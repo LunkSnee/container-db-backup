@@ -1,52 +1,66 @@
-## 4.2.0 2026-04-03 <LunkSnee>
+# Changelog
 
-   ### Security
-      - CRITICAL: Remove credential exposure in environment variables - MySQL, PostgreSQL, MSSQL, Redis now use secure credential files instead of command-line arguments or exported variables
-      - CRITICAL: Remove insecure package installation flags - Replace --allow-untrusted apk and --break-system-packages pip with verified downloads and Python venv isolation
-      - HIGH: Add SHA256 checksum verification for all external downloads - PostgreSQL, config files, MSSQL tools, InfluxDB, pbzip2
-      - HIGH: Restrict backup log permissions from world-readable (755) to owner-only (700)
-      - MEDIUM: Remove eval-based script execution - Replace unsafe eval() with direct script execution for pre/post backup and notification hooks
-      - Add version pinning for all external dependencies including blobxfer
+## [4.2.0] 2026-04-03 (LunkSnee)
 
-   ### Changed
-      - MySQL/MariaDB: Use ~/.my.cnf with restricted permissions instead of MYSQL_PWD environment variable
-      - PostgreSQL: Use ~/.pgpass file (PGPASSFILE) instead of PGPASSWORD environment variable
-      - MSSQL: Use SQLCMDPASSWORD environment variable instead of -P command-line argument (set once, then cleared)
-      - Redis: Use REDISCLI_AUTH environment variable instead of -a command-line argument
-      - Package management: Replace pip --break-system-packages with isolated Python venv at /opt/dbbackup/venv
-      - External downloads: All files verified via SHA256 checksums before extraction
+### Security
+- CRITICAL: Remove credential exposure in environment variables - MySQL,
+  PostgreSQL, MSSQL, Redis now use secure credential files instead of
+  command-line arguments or exported variables
+- CRITICAL: Remove insecure package installation flags - Replace
+  --allow-untrusted apk and --break-system-packages pip with verified
+  downloads and Python venv isolation
+- HIGH: Add SHA256 checksum verification for all external downloads -
+  PostgreSQL, config files, MSSQL tools, InfluxDB, pbzip2
+- HIGH: Restrict backup log permissions from world-readable (755) to
+  owner-only (700)
+- MEDIUM: Remove eval-based script execution - Replace unsafe eval()
+  with direct script execution for pre/post backup and notification
+  hooks
+- Add version pinning for all external dependencies including blobxfer
 
-
-## 4.1.100 2026-03-13 <dave at tiredofit dot ca>
-
-   ### Changed
-      - Repush of 4.1.99
-
-
-## 4.1.99 2026-03-12 <dave at tiredofit dot ca>
-
-Final release under tiredofit namespace - Development continues with enhanced security hardening.
-
-   ### Added
-      - Postgreaql 18 support
-      - AWS CLI 1.44.56
-      - MySQL 8.4.8
-      - MSSQL 18.6.1-1
-
-
-## 4.1.21 2025-08-08 <dave at tiredofit dot ca>
-
-   ### Changed
-      - Fix for 4.1.20 release inadvertently failing backups (credit tlex@github)
+### Changed
+- MySQL/MariaDB: Use ~/.my.cnf with restricted permissions instead of
+  MYSQL_PWD environment variable
+- PostgreSQL: Use ~/.pgpass file (PGPASSFILE) instead of PGPASSWORD
+  environment variable
+- MSSQL: Use SQLCMDPASSWORD environment variable instead of -P
+  command-line argument (set once, then cleared)
+- Redis: Use REDISCLI_AUTH environment variable instead of -a
+  command-line argument
+- Package management: Replace pip --break-system-packages with isolated
+  Python venv at /opt/dbbackup/venv
+- External downloads: All files verified via SHA256 checksums before
+  extraction
 
 
-## 4.1.20 2025-07-23 <dave at tiredofit dot ca>
+## [4.1.100] 2026-03-13 (dave at tiredofit dot ca)
 
-   ### Changed
-      - Fix backup error checking routines #417 - credit alteriks@github
+### Changed
+- Repush of 4.1.99
+
+## [4.1.99] 2026-03-12 (dave at tiredofit dot ca)
+
+Final release under tiredofit namespace - Development continues with
+enhanced security hardening.
+
+### Added
+- Postgreaql 18 support
+- AWS CLI 1.44.56
+- MySQL 8.4.8
+- MSSQL 18.6.1-1
 
 
-## 4.1.19 2025-05-28 <dave at tiredofit dot ca>
+## [4.1.21] 2025-08-08 (dave at tiredofit dot ca)
+
+### Changed
+- Fix for 4.1.20 release inadvertently failing backups (credit tlex)
+
+## [4.1.20] 2025-07-23 (dave at tiredofit dot ca)
+
+### Changed
+- Fix backup error checking routines #417 - credit alteriks
+
+## [4.1.19] 2025-05-28 (dave at tiredofit dot ca)
 
    ### Changed
       - Force overwrite manual scripts as opposed to append (#414)

@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Run Hadolint"
-        uses: hadolint/hadolint-action@v3
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
           ignore: DL3028,DL3029,DL3009
@@ -48,7 +48,7 @@ jobs:
       - name: "Run ShellCheck"
         uses: ludeeus/action-shellcheck@master
         with:
-          path: install
+          scandir: install
           severity: warning
 
   security-scan:
@@ -69,11 +69,10 @@ jobs:
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-results.sarif'
-          ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
       - name: "Upload Trivy results to GitHub Security tab"
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
@@ -124,8 +123,8 @@ jobs:
       - name: "Validate Markdown"
         uses: nosborn/github-action-markdown-cli@v3.3.0
         with:
-          files: .
-          ignore: node_modules
+          files: CHANGELOG.md README.md
+          ignore_files: node_modules
 
   results:
     name: "Security Scan Summary"
