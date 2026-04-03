@@ -3,6 +3,7 @@
 ## [4.2.0] 2026-04-03 (LunkSnee)
 
 ### Security
+
 - CRITICAL: Remove credential exposure in environment variables - MySQL,
   PostgreSQL, MSSQL, Redis now use secure credential files instead of
   command-line arguments or exported variables
@@ -19,6 +20,7 @@
 - Add version pinning for all external dependencies including blobxfer
 
 ### Changed
+
 - MySQL/MariaDB: Use ~/.my.cnf with restricted permissions instead of
   MYSQL_PWD environment variable
 - PostgreSQL: Use ~/.pgpass file (PGPASSFILE) instead of PGPASSWORD
@@ -32,10 +34,10 @@
 - External downloads: All files verified via SHA256 checksums before
   extraction
 
-
 ## [4.1.100] 2026-03-13 (dave at tiredofit dot ca)
 
 ### Changed
+
 - Repush of 4.1.99
 
 ## [4.1.99] 2026-03-12 (dave at tiredofit dot ca)
@@ -44,6 +46,7 @@ Final release under tiredofit namespace - Development continues with
 enhanced security hardening.
 
 ### Added
+
 - Postgreaql 18 support
 - AWS CLI 1.44.56
 - MySQL 8.4.8
@@ -53,17 +56,20 @@ enhanced security hardening.
 ## [4.1.21] 2025-08-08 (dave at tiredofit dot ca)
 
 ### Changed
+
 - Fix for 4.1.20 release inadvertently failing backups (credit tlex)
 
 ## [4.1.20] 2025-07-23 (dave at tiredofit dot ca)
 
 ### Changed
+
 - Fix backup error checking routines #417 - credit alteriks
 
 ## [4.1.19] 2025-05-28 (dave at tiredofit dot ca)
 
-   ### Changed
-      - Force overwrite manual scripts as opposed to append (#414)
+### Changed
+
+- Force overwrite manual scripts as opposed to append (#414)
 
 
 ## 4.1.18 2025-05-12 <dave at tiredofit dot ca>

@@ -4,6 +4,8 @@ ARG DISTRO_VARIANT=3.21
 FROM docker.io/alpine:${DISTRO_VARIANT}
 LABEL maintainer="lunksnee (github.com/lunksnee)"
 
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
 ENV INFLUX1_CLIENT_VERSION=1.8.0 \
     INFLUX2_CLIENT_VERSION=2.7.5 \
     MSODBC_VERSION=18.6.1.1-1 \
@@ -74,16 +76,16 @@ RUN source /assets/functions/00-container && \
                     && \
    \
    mkdir -p /usr/src/postgres && \
-   curl -sSL https://ftp.postgresql.org/pub/source/v$POSTGRES_VERSION/postgresql-$POSTGRES_VERSION.tar.bz2 -o /tmp/postgresql-$POSTGRES_VERSION.tar.bz2 && \
+   curl -sSL --progress-bar https://ftp.postgresql.org/pub/source/v"${POSTGRES_VERSION}"/postgresql-"${POSTGRES_VERSION}".tar.bz2 -o /tmp/postgresql-"${POSTGRES_VERSION}".tar.bz2 && \
    echo "$POSTGRES_TAR_SHA256  /tmp/postgresql-$POSTGRES_VERSION.tar.bz2" | sha256sum -c - && \
-   tar xvfj /tmp/postgresql-$POSTGRES_VERSION.tar.bz2 --strip 1 -C /usr/src/postgres && \
+   tar xvfj /tmp/postgresql-"${POSTGRES_VERSION}".tar.bz2 --strip 1 -C /usr/src/postgres && \
    cd /usr/src/postgres && \
    awk '$1 == "#define" && $2 == "DEFAULT_PGSOCKET_DIR" && $3 == "\"/tmp\"" { $3 = "\"/var/run/postgresql\""; print; next } { print }' src/include/pg_config_manual.h > src/include/pg_config_manual.h.new && \
    grep '/var/run/postgresql' src/include/pg_config_manual.h.new && \
    mv src/include/pg_config_manual.h.new src/include/pg_config_manual.h && \
-   wget -O config/config.guess 'https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb' && \
+   curl -sSL --progress-bar https://git.savannah.gnu.org/cgit/config.git/plain/config.guess?id=7d3d27baf8107b630586c962c057e22149653deb -o config/config.guess && \
    echo "$CONFIG_GUESS_SHA256  config/config.guess" | sha256sum -c - && \
-   wget -O config/config.sub 'https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb' && \
+   curl -sSL --progress-bar https://git.savannah.gnu.org/cgit/config.git/plain/config.sub?id=7d3d27baf8107b630586c962c057e22149653deb -o config/config.sub && \
    echo "$CONFIG_SUB_SHA256  config/config.sub" | sha256sum -c - && \
    export LLVM_CONFIG="/usr/lib/llvm19/bin/llvm-config" && \
    export CLANG=clang-19  && \
@@ -208,19 +210,19 @@ RUN source /assets/functions/00-container && \
     esac; \
     \
     if [ "${mssql,,}" = "true" ] ; then \
-        curl -O https://download.microsoft.com/download/9dcab408-e0d4-4571-a81a-5a0951e3445f/msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk ; \
+        curl -sSL --progress-bar "https://download.microsoft.com/download/9dcab408-e0d4-4571-a81a-5a0951e3445f/msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk" -O ; \
         echo "${MSODBCSQL18_SHA256}  msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk" | sha256sum -c - ; \
-        curl -O https://download.microsoft.com/download/b60bb8b6-d398-4819-9950-2e30cf725fb0/mssql-tools18_${MSSQL_VERSION}_${mssql_arch}.apk ; \
+        curl -sSL --progress-bar "https://download.microsoft.com/download/b60bb8b6-d398-4819-9950-2e30cf725fb0/mssql-tools18_${MSSQL_VERSION}_${mssql_arch}.apk" -O ; \
         echo "${MSSQL_TOOLS18_SHA256}  mssql-tools18_${MSSQL_VERSION}_${mssql_arch}.apk" | sha256sum -c - ; \
-        apk add --no-cache msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk mssql-tools18_${MSSQL_VERSION}_${mssql_arch}.apk ; \
+        apk add --no-cache "msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk" "mssql-tools18_${MSSQL_VERSION}_${mssql_arch}.apk" ; \
     else \
         echo >&2 "Detected non x86_64 or ARM64 build variant, skipping MSSQL installation" ; \
     fi; \
     \
     if [ "${influx2,,}" = "true" ] ; then \
-        curl -sSL https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz -o /tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz && \
+        curl -sSL --progress-bar "https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" -o "/tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" && \
         echo "$INFLUX2_CLIENT_SHA256  /tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" | sha256sum -c - && \
-        tar xvfz /tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz --strip=1 -C /usr/src/ ; \
+        tar xvfz "/tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" --strip=1 -C /usr/src/ ; \
         chmod +x /usr/src/influx ; \
         mv /usr/src/influx /usr/sbin/ ; \
     else \
