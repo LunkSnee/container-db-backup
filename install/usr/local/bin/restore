@@ -37,7 +37,7 @@ else
         "-h" )
             cat <<EOF
 ${IMAGE_NAME} Restore Tool ${IMAGE_VERSION}
-(c) 2023 Dave Conroy (https://github.com/tiredofit) (https://www.tiredofit.ca)
+(c) 2023 lunksnee (https://github.com/lunksnee)
 
 This script will assist you in recovering databases taken by the Docker image.
 You will be presented with a series of menus allowing you to choose:
@@ -1110,14 +1110,45 @@ case "${r_dbtype}" in
             mysql_ssl_option=""
         fi
         print_info "Restoring '${r_filename}' into '${r_dbhost}'/'${r_dbname}'"
-        pv ${r_filename} | ${decompress_cmd}cat | mariadb -u${r_dbuser} -p${r_dbpass} -P${r_dbport} -h${r_dbhost} ${mysql_ssl_option} ${r_dbname}
+        if [ -n "${r_dbpass}" ]; then
+            restore_mysql_cnf=$(mktemp)
+            cat > "${restore_mysql_cnf}" <<EOF
+[client]
+user=${r_dbuser}
+password=${r_dbpass}
+host=${r_dbhost}
+port=${r_dbport}
+EOF
+            chmod 600 "${restore_mysql_cnf}"
+            mysql_restore_cmd="mariadb --defaults-extra-file=${restore_mysql_cnf} ${mysql_ssl_option} ${r_dbname}"
+            r_dbpass=""
+        else
+            mysql_restore_cmd="mariadb -u${r_dbuser} -P${r_dbport} -h${r_dbhost} ${mysql_ssl_option} ${r_dbname}"
+        fi
+        pv ${r_filename} | ${decompress_cmd}cat | ${mysql_restore_cmd}
         exit_code=$?
+        if [ -n "${restore_mysql_cnf}" ]; then
+            rm -f "${restore_mysql_cnf}"
+        fi
     ;;
     pgsql | postgres* )
         print_info "Restoring '${r_filename}' into '${r_dbhost}'/'${r_dbname}'"
-        export PGPASSWORD=${r_dbpass}
-        pv ${r_filename} | ${decompress_cmd}cat | psql  -d ${r_dbname} -h ${r_dbhost} -p ${r_dbport} -U ${r_dbuser}
+        if [ -n "${r_dbpass}" ]; then
+            restore_pgpass=$(mktemp)
+            cat > "${restore_pgpass}" <<EOF
+${r_dbhost}:${r_dbport}:${r_dbname}:${r_dbuser}:${r_dbpass}
+EOF
+            chmod 600 "${restore_pgpass}"
+            export PGPASSFILE="${restore_pgpass}"
+            r_dbpass=""
+        else
+            unset PGPASSFILE
+        fi
+        pv ${r_filename} | ${decompress_cmd}cat | psql -d ${r_dbname} -h ${r_dbhost} -p ${r_dbport} -U ${r_dbuser}
         exit_code=$?
+        if [ -n "${restore_pgpass}" ]; then
+            rm -f "${restore_pgpass}"
+        fi
     ;;
     mongo )
         cat << EOF

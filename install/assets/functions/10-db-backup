@@ -19,7 +19,7 @@ bootstrap_filesystem() {
 
     if [ "$(stat -c %U "${LOG_PATH}")" != "${DBBACKUP_USER}" ] ; then chown -R "${DBBACKUP_USER}":"${DBBACKUP_GROUP}" "${LOG_PATH}" ; fi
     if [ ! -d "${LOG_PATH}"/"$(date +'%Y%m%d')" ]; then run_as_user mkdir -p "${LOG_PATH}"/"$(date +'%Y%m%d')"; fi
-    if [ "$(stat -c %a "${LOG_PATH}")" != "755" ] ; then chmod -R 755 "${LOG_PATH}" ; fi
+    if [ "$(stat -c %a "${LOG_PATH}")" != "700" ] ; then chmod -R 700 "${LOG_PATH}" ; fi
 
     if [ ! -d "${TEMP_PATH}" ]; then
         mkdir -p "${TEMP_PATH}"
@@ -427,7 +427,25 @@ EOF
 
                 print_debug "Using '${backup_job_mysql_client,,}' as client"
 
-                if [ -n "${backup_job_db_pass}" ] ; then export MYSQL_PWD=${backup_job_db_pass} ; fi
+                if [ -n "${backup_job_db_pass}" ] ; then
+                    mysql_cnf_file=$(mktemp)
+                    cat > "${mysql_cnf_file}" <<EOF
+[client]
+user=${backup_job_db_user}
+password=${backup_job_db_pass}
+host=${backup_job_db_host}
+port=${backup_job_db_port}
+EOF
+                    chmod 600 "${mysql_cnf_file}"
+                    mysql_defaults="--defaults-extra-file=${mysql_cnf_file}"
+                    export mysql_defaults
+                    # Keep db pass out of environment and command line
+                    unset MYSQL_PWD
+                    backup_job_db_pass=""
+                else
+                    mysql_defaults=""
+                fi
+
                 if var_true "${backup_job_mysql_enable_tls}" ; then
                     case "${backup_job_mysql_client,,}" in
                         mariadb )
@@ -484,13 +502,29 @@ EOF
             postgres* | "pgsql" )
                 dbtype=pgsql
                 backup_job_db_port=${backup_job_db_port:-5432}
-                [[ ( -n "${backup_job_db_pass}" ) ]] && POSTGRES_PASS_STR="PGPASSWORD=${backup_job_db_pass}"
+                if [ -n "${backup_job_db_pass}" ] ; then
+                    pgpass_file=$(mktemp)
+                    cat > "${pgpass_file}" <<EOF
+${backup_job_db_host}:${backup_job_db_port}:*:${backup_job_db_user}:${backup_job_db_pass}
+EOF
+                    chmod 600 "${pgpass_file}"
+                    export PGPASSFILE="${pgpass_file}"
+                    backup_job_db_pass=""
+                else
+                    unset PGPASSFILE
+                fi
                 check_var backup_job_db_name DB"${v_instance}"_NAME "database name. Seperate multiple with commas"
             ;;
             "redis" )
                 dbtype=redis
                 backup_job_db_port=${backup_job_db_port:-6379}
-                [[ ( -n "${backup_job_db_pass}" ) ]] && REDIS_PASS_STR=" -a ${backup_job_db_pass}"
+                if [ -n "${backup_job_db_pass}" ] ; then
+                    export REDISCLI_AUTH="${backup_job_db_pass}"
+                    REDIS_PASS_STR=""
+                    backup_job_db_pass=""
+                else
+                    REDIS_PASS_STR=""
+                fi
             ;;
             sqlite* )
                 dbtype=sqlite3
@@ -655,8 +689,12 @@ backup_mssql() {
             backup_job_filename_base=mssql_${backup_job_db_name,,}_${backup_job_db_host,,}
             pre_dbbackup "${backup_job_db_name}"
             write_log notice "Dumping MSSQL database: '${backup_job_db_name}'"
+            if [ -n "${backup_job_db_pass}" ] ; then
+                export SQLCMDPASSWORD="${backup_job_db_pass}"
+                backup_job_db_pass=""
+            fi
             if var_true "${DEBUG_BACKUP_MSSQL}" ; then debug on; fi
-            silent run_as_user ${play_fair} /opt/mssql-tools18/bin/sqlcmd -C -S ${backup_job_db_host}\,${backup_job_db_port} -U ${backup_job_db_user} -P ${backup_job_db_pass} -Q "BACKUP DATABASE [${backup_job_db_name}] TO DISK = N'${temporary_directory}/${backup_job_filename}' WITH NOFORMAT, NOINIT, NAME = '${backup_job_db_name}-full', SKIP, NOREWIND, NOUNLOAD, STATS = 10"
+            silent run_as_user ${play_fair} /opt/mssql-tools18/bin/sqlcmd -C -S ${backup_job_db_host}\,${backup_job_db_port} -U ${backup_job_db_user} -Q "BACKUP DATABASE [${backup_job_db_name}] TO DISK = N'${temporary_directory}/${backup_job_filename}' WITH NOFORMAT, NOINIT, NAME = '${backup_job_db_name}-full', SKIP, NOREWIND, NOUNLOAD, STATS = 10"
             exit_code=$?
             if var_true "${DEBUG_BACKUP_MSSQL}" ; then debug off; fi
             backup_job_filename_original=${backup_job_filename}
@@ -680,8 +718,12 @@ backup_mssql() {
             backup_job_filename_base=mssql_${backup_job_db_name,,}_trn_${backup_job_db_host,,}
             pre_dbbackup "${backup_job_db_name}"
             write_log notice "Dumping MSSQL database: '${backup_job_db_name}'"
+            if [ -n "${backup_job_db_pass}" ] ; then
+                export SQLCMDPASSWORD="${backup_job_db_pass}"
+                backup_job_db_pass=""
+            fi
             if var_true "${DEBUG_BACKUP_MSSQL}" ; then debug on; fi
-            silent run_as_user ${play_fair} /opt/mssql-tools18/bin/sqlcmd -C -S ${backup_job_db_host}\,${backup_job_db_port} -U ${backup_job_db_user} -P ${backup_job_db_pass} -Q "BACKUP LOG [${backup_job_db_name}] TO DISK = N'${temporary_directory}/${backup_job_filename}' WITH NOFORMAT, NOINIT, NAME = '${backup_job_db_name}-log', SKIP, NOREWIND, NOUNLOAD, STATS = 10"
+            silent run_as_user ${play_fair} /opt/mssql-tools18/bin/sqlcmd -C -S ${backup_job_db_host}\,${backup_job_db_port} -U ${backup_job_db_user} -Q "BACKUP LOG [${backup_job_db_name}] TO DISK = N'${temporary_directory}/${backup_job_filename}' WITH NOFORMAT, NOINIT, NAME = '${backup_job_db_name}-log', SKIP, NOREWIND, NOUNLOAD, STATS = 10"
             exit_code=$?
             if var_true "${DEBUG_BACKUP_MSSQL}" ; then debug off; fi
             backup_job_filename_original=${backup_job_filename}
@@ -713,7 +755,7 @@ backup_mysql() {
 
     if [ "${backup_job_db_name,,}" = "all" ] ; then
         write_log debug "Preparing to back up everything except for information_schema and _* prefixes"
-        db_names=$(run_as_user ${_mysql_prefix}${_mysql_bin_prefix/-/} -h ${backup_job_db_host} -P ${backup_job_db_port} -u${backup_job_db_user} ${mysql_tls_args} ${backup_job_extra_opts} ${backup_job_extra_enumeration_opts} --batch -e "SHOW DATABASES;" | grep -v Database | grep -v schema )
+        db_names=$(run_as_user ${_mysql_prefix}${_mysql_bin_prefix/-/} ${mysql_defaults} -h ${backup_job_db_host} -P ${backup_job_db_port} -u${backup_job_db_user} ${mysql_tls_args} ${backup_job_extra_opts} ${backup_job_extra_enumeration_opts} --batch -e "SHOW DATABASES;" | grep -v Database | grep -v schema )
         if [ -n "${backup_job_db_name_exclude}" ] ; then
             db_names_exclusions=$(echo "${backup_job_db_name_exclude}" | tr ',' '\n')
             for db_exclude in ${db_names_exclusions} ; do
@@ -736,7 +778,7 @@ backup_mysql() {
                 pre_dbbackup "${db}"
                 write_log notice "Dumping MySQL/MariaDB database: '${db}' ${compression_string}"
                 if var_true "${DEBUG_BACKUP_MYSQL}" ; then debug on; fi
-                run_as_user ${play_fair} ${_mysql_prefix}${_mysql_bin_prefix}dump --max-allowed-packet=${backup_job_mysql_max_allowed_packet} -h ${backup_job_db_host} -P ${backup_job_db_port} -u${backup_job_db_user} ${events} ${single_transaction} ${stored_procedures} ${mysql_tls_args} ${backup_job_extra_opts} ${backup_job_extra_backup_opts} $db | ${compress_cmd} | run_as_user tee "${temporary_directory}"/"${backup_job_filename}" > /dev/null
+                run_as_user ${play_fair} ${_mysql_prefix}${_mysql_bin_prefix}dump ${mysql_defaults} --max-allowed-packet=${backup_job_mysql_max_allowed_packet} -h ${backup_job_db_host} -P ${backup_job_db_port} -u${backup_job_db_user} ${events} ${single_transaction} ${stored_procedures} ${mysql_tls_args} ${backup_job_extra_opts} ${backup_job_extra_backup_opts} $db | ${compress_cmd} | run_as_user tee "${temporary_directory}"/"${backup_job_filename}" > /dev/null
                 exit_code=$((PIPESTATUS[0] + PIPESTATUS[1] + PIPESTATUS[2]))
                 if var_true "${DEBUG_BACKUP_MYSQL}" ; then debug off; fi
                 check_exit_code backup "${backup_job_filename}"
@@ -757,7 +799,7 @@ backup_mysql() {
         pre_dbbackup all
         write_log notice "Dumping all MySQL / MariaDB databases: '$(echo ${db_names} | xargs | tr ' ' ',')' ${compression_string}"
         if var_true "${DEBUG_BACKUP_MYSQL}" ; then debug on; fi
-        run_as_user ${play_fair} ${_mysql_prefix}${_mysql_bin_prefix}dump --max-allowed-packet=${backup_job_mysql_max_allowed_packet} -h ${backup_job_db_host} -P ${backup_job_db_port} -u${backup_job_db_user} ${events} ${single_transaction} ${stored_procedures} ${mysql_tls_args} ${backup_job_extra_opts} ${backup_job_extra_backup_opts} --databases $(echo ${db_names} | xargs) | ${compress_cmd} | run_as_user tee "${temporary_directory}"/"${backup_job_filename}" > /dev/null
+        run_as_user ${play_fair} ${_mysql_prefix}${_mysql_bin_prefix}dump ${mysql_defaults} --max-allowed-packet=${backup_job_mysql_max_allowed_packet} -h ${backup_job_db_host} -P ${backup_job_db_port} -u${backup_job_db_user} ${events} ${single_transaction} ${stored_procedures} ${mysql_tls_args} ${backup_job_extra_opts} ${backup_job_extra_backup_opts} --databases $(echo ${db_names} | xargs) | ${compress_cmd} | run_as_user tee "${temporary_directory}"/"${backup_job_filename}" > /dev/null
                 exit_code=$((PIPESTATUS[0] + PIPESTATUS[1] + PIPESTATUS[2]))
         if var_true "${DEBUG_BACKUP_MYSQL}" ; then debug off; fi
         check_exit_code backup "${backup_job_filename}"
@@ -768,6 +810,10 @@ backup_mysql() {
         check_exit_code move "${backup_job_filename}"
         post_dbbackup all
         cleanup_old_data
+    fi
+    if [ -n "${mysql_cnf_file}" ] ; then
+        rm -f "${mysql_cnf_file}"
+        unset mysql_cnf_file mysql_defaults
     fi
 }
 
@@ -794,7 +840,10 @@ backup_pgsql() {
     }
 
     if var_true "${DEBUG_BACKUP_PGSQL}" ; then debug on; fi
-    export PGPASSWORD=${backup_job_db_pass}
+    # Use PGPASSFILE for PostgreSQL credentials instead of exposing PGPASSWORD
+    if [ -z "${PGPASSFILE}" ] ; then
+        write_log warning "No PGPASSFILE set; using connection without password in ENV"
+    fi
     if [ -n "${backup_job_db_auth}" ] ; then
         authdb=${backup_job_db_auth}
     else
@@ -914,6 +963,10 @@ backup_redis() {
     check_exit_code move "${backup_job_filename}"
     post_dbbackup all
     cleanup_old_data
+    if [ -n "${pgpass_file}" ] ; then
+        rm -f "${pgpass_file}"
+        unset pgpass_file PGPASSFILE
+    fi
 }
 
 backup_sqlite3() {
@@ -999,8 +1052,7 @@ check_availability() {
             ;;
             "mysql" )
                 counter=0
-                export MYSQL_PWD=${backup_job_db_pass}
-                while ! (run_as_user ${_mysql_prefix}${_mysql_bin_prefix}admin -u"${backup_job_db_user}" -P"${backup_job_db_port}" -h"${backup_job_db_host}" ${mysql_tls_args} status > /dev/null 2>&1) ; do
+                while ! (run_as_user ${_mysql_prefix}${_mysql_bin_prefix}admin ${mysql_defaults} -u"${backup_job_db_user}" -P"${backup_job_db_port}" -h"${backup_job_db_host}" ${mysql_tls_args} status > /dev/null 2>&1) ; do
                     sleep 5
                     (( counter+=5 ))
                     write_log warn "MySQL/MariaDB Server '${backup_job_db_host}' is not accessible, retrying.. (${counter} seconds so far)"
@@ -1426,12 +1478,12 @@ notify() {
     notification_custom() {
         if [ -n "${NOTIFICATION_CUSTOM_SCRIPT}" ] ; then
             if var_true "${NOTIFICATION_CUSTOM_SCRIPT_SKIP_X_VERIFY}" ; then
-                eval "${NOTIFICATION_CUSTOM_SCRIPT}" "${1}" "${2}" "${3}" "${4}" "${5}"
+                "${NOTIFICATION_CUSTOM_SCRIPT}" "${1}" "${2}" "${3}" "${4}" "${5}"
             else
                 if [ -x "${NOTIFICATION_CUSTOM_SCRIPT}" ] ; then
                     write_log notice "Found NOTIFICATION_CUSTOM_SCRIPT environment variable. Executing '${NOTIFICATION_CUSTOM_SCRIPT}"
                     # script timestamp logfile errorcode subject body
-                    eval "${NOTIFICATION_CUSTOM_SCRIPT}" "${1}" "${2}" "${3}" "${4}" "${5}"
+                    "${NOTIFICATION_CUSTOM_SCRIPT}" "${1}" "${2}" "${3}" "${4}" "${5}"
                 else
                     write_log error "Can't execute NOTIFICATION_CUSTOM_SCRIPT environment variable '${NOTIFICATION_CUSTOM_SCRIPT}' as its filesystem bit is not executible!"
                 fi
@@ -1713,11 +1765,11 @@ pre_dbbackup() {
     ### Pre Script Support
     if [ -n "${backup_job_pre_script}" ] ; then
         if var_true "${backup_job_pre_script_x_verify}" ; then
-            run_as_user eval "${backup_job_pre_script}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${backup_job_filename}"
+            run_as_user "${backup_job_pre_script}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${backup_job_filename}"
         else
             if [ -x "${backup_job_pre_script}" ] ; then
                 write_log notice "Found PRE_SCRIPT environment variable. Executing '${backup_job_pre_script}"
-                run_as_user eval "${backup_job_pre_script}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${backup_job_filename}"
+                run_as_user "${backup_job_pre_script}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${backup_job_filename}"
             else
                 write_log error "Can't execute PRE_SCRIPT environment variable '${backup_job_pre_script}' as its filesystem bit is not executible!"
             fi
@@ -1782,11 +1834,11 @@ EOZP
     ### Post Script Support
     if [ -n "${backup_job_post_script}" ] ; then
         if var_true "${backup_job_post_script_x_verify}" ; then
-            eval "${backup_job_post_script}" "${exit_code}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${dbbackup_finish_time}" "${dbbackup_total_time}" "${backup_job_filename}" "${filesize}" "${checksum_value}" "${move_exit_code}"
+            "${backup_job_post_script}" "${exit_code}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${dbbackup_finish_time}" "${dbbackup_total_time}" "${backup_job_filename}" "${filesize}" "${checksum_value}" "${move_exit_code}"
         else
             if [ -x "${backup_job_post_script}" ] ; then
                 write_log notice "Found POST_SCRIPT environment variable. Executing '${backup_job_post_script}"
-                eval "${backup_job_post_script}" "${exit_code}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${dbbackup_finish_time}" "${dbbackup_total_time}" "${backup_job_filename}" "${filesize}" "${checksum_value}" "${move_exit_code}"
+                "${backup_job_post_script}" "${exit_code}" "${dbtype}" "${backup_job_db_host}" "${1}" "${dbbackup_start_time}" "${dbbackup_finish_time}" "${dbbackup_total_time}" "${backup_job_filename}" "${filesize}" "${checksum_value}" "${move_exit_code}"
             else
                 write_log error "Can't execute POST_SCRIPT environment variable '${backup_job_post_script}' as its filesystem bit is not executible!"
             fi

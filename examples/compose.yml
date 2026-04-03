@@ -2,7 +2,7 @@ services:
   example-db:
     hostname: example-db-host
     container_name: example-db
-    image: docker.io/nfrastack/mariadb:11.8
+    image: mariadb:11.8
     ports:
       - 3306:3306
     volumes:
@@ -18,7 +18,7 @@ services:
 
   example-db-backup:
     container_name: example-db-backup
-    image: tiredofit/db-backup
+    image: ghcr.io/lunksnee/container-db-backup
     volumes:
       - ./backups:/backup
       #- ./post-script.sh:/assets/custom-scripts/post-script.sh

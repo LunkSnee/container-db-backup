@@ -1,19 +1,16 @@
-# github.com/tiredofit/docker-db-backup
+# Container DB Backup
 
-[![GitHub release](https://img.shields.io/github/v/tag/tiredofit/docker-db-backup?style=flat-square)](https://github.com/tiredofit/docker-db-backup/releases/latest)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/tiredofit/docker-db-backup/main.yml?branch=main&style=flat-square)](https://github.com/tiredofit/docker-db-backup/actions)
-[![Docker Stars](https://img.shields.io/docker/stars/tiredofit/db-backup.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/db-backup/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/tiredofit/db-backup.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/db-backup/)
-[![Become a sponsor](https://img.shields.io/badge/sponsor-tiredofit-181717.svg?logo=github&style=flat-square)](https://www.tiredofit.ca/sponsor)
-[![Paypal Donate](https://img.shields.io/badge/donate-paypal-00457c.svg?logo=paypal&style=flat-square)](https://www.paypal.me/tiredofit)
+Production-grade database backup container with security-first architecture.
+
+[![GitHub release](https://img.shields.io/badge/version-4.2.0-blue?style=flat-square)]()
+[![Build Status](https://github.com/lunksnee/container-db-backup/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/lunksnee/container-db-backup/actions)
+[![Security Scanning](https://github.com/lunksnee/container-db-backup/actions/workflows/security.yml/badge.svg)](https://github.com/lunksnee/container-db-backup/actions)
 
 ---
 
 ## About
 
->> This is being migrated to the nfrastack/container-db-backup namespace - A new nfrastack release will come in April 2026
-
-This will build a container for backing up multiple types of DB Servers
+This will build a container for backing up multiple types of DB Servers with production-grade security hardening including credential isolation, verified package downloads, and safe script execution.
 
 Backs up CouchDB, InfluxDB, MySQL/MariaDB, Microsoft SQL, MongoDB, Postgres, Redis servers.
 
@@ -36,7 +33,7 @@ Backs up CouchDB, InfluxDB, MySQL/MariaDB, Microsoft SQL, MongoDB, Postgres, Red
 
 ## Maintainer
 
-- [Dave Conroy](https://github.com/tiredofit)
+- [lunksnee](https://github.com/lunksnee)
 
 ## Table of Contents
 
@@ -105,6 +102,11 @@ Backs up CouchDB, InfluxDB, MySQL/MariaDB, Microsoft SQL, MongoDB, Postgres, Red
   - [Shell Access](#shell-access)
   - [Manual Backups](#manual-backups)
   - [Restoring Databases](#restoring-databases)
+- [Security](#security)
+  - [Credential Protection](#credential-protection)
+  - [Package Integrity](#package-integrity)
+  - [Backup Log Protection](#backup-log-protection)
+  - [Script Execution Safety](#script-execution-safety)
 - [Support](#support)
   - [Usage](#usage)
   - [Bugfixes](#bugfixes)
@@ -124,27 +126,37 @@ Clone this repository and build the image with `docker build <arguments> (imagen
 
 ### Prebuilt Images
 
-Builds of the image are available on [Docker Hub](https://hub.docker.com/r/tiredofit/db-backup)
-
-Builds of the image are also available on the [Github Container Registry](https://github.com/tiredofit/docker-db-backup/pkgs/container/docker-db-backup)
+Builds of the image are available on [GitHub Container Registry](https://github.com/lunksnee/container-db-backup/pkgs/container/container-db-backup)
 
 ```bash
-docker pull ghcr.io/tiredofit/docker-db-backup:(imagetag)
+docker pull ghcr.io/lunksnee/container-db-backup:(imagetag)
 ```
 
 The following image tags are available along with their tagged release based on what's written in the [Changelog](CHANGELOG.md):
 
-| Alpine Base | Tag       |
-| ----------- | --------- |
-| latest      | `:latest` |
-
-```bash
-docker pull docker.io/tiredofit/db-backup:(imagetag)
-```
+| Type              | Tag                      |
+| ----------------- | ------------------------ |
+| Latest Release    | `:latest`                |
+| Current Release   | `:4.2.0`                 |
+| Development Build | `:dev`                   |
+| Architecture Tag  | `:4.2.0-amd64` / `-arm64` / `-armv7` |
 
 #### Multi Architecture
 
-Images are built primarily for `amd64` architecture, and may also include builds for `arm/v7`, `arm64` and others. These variants are all unsupported. Consider [sponsoring](https://www.tiredofit.ca/sponsor) my work so that I can work with various hardware. To see if this image supports multiple architectures, type `docker manifest (image):(tag)`
+Images are built for multiple architectures:
+- `linux/amd64` (Intel/AMD 64-bit)
+- `linux/arm64` (ARM 64-bit / Apple Silicon / AWS Graviton)
+- `linux/arm/v7` (Raspberry Pi / 32-bit ARM)
+
+All architectures include the same features and security hardening. Pull the architecture-specific tag or use the version tag for automatic architecture selection:
+
+```bash
+# Automatic architecture selection
+docker pull ghcr.io/lunksnee/container-db-backup:4.2.0
+
+# Specific architecture
+docker pull ghcr.io/lunksnee/container-db-backup:4.2.0-arm64
+```
 
 ## Configuration
 
@@ -167,15 +179,9 @@ The following directories are used for configuration and can be mapped for persi
 
 ### Environment Variables
 
-#### Base Images used
+### Base Image
 
-This image relies on an [Alpine Linux](https://hub.docker.com/r/tiredofit/alpine) base image that relies on an [init system](https://github.com/just-containers/s6-overlay) for added capabilities. Outgoing SMTP capabilities are handled via `msmtp`. Individual container performance monitoring is performed by [zabbix-agent](https://zabbix.org). Additional tools include: `bash`,`curl`,`less`,`logrotate`, `nano`.
-
-Be sure to view the following repositories to understand all the customizable options:
-
-| Image                                                  | Description                            |
-| ------------------------------------------------------ | -------------------------------------- |
-| [OS Base](https://github.com/tiredofit/docker-alpine/) | Customized Image based on Alpine Linux |
+This image is built on Alpine Linux with s6-overlay for init capabilities. It includes standard tools: bash, curl, less, logrotate, nano, plus SMTP support via msmtp, and optional Zabbix monitoring agent.
 
 #### Container Options
 
@@ -788,14 +794,14 @@ Copy the JSON response `access_token` that will look something like this:
 | ------------------------ | -------------------------------------------------------------------------------------------- | ------- | ------- |
 | `MATTERMOST_WEBHOOK_URL` | Full URL to send webhook notifications to                                                    |         | x       |
 | `MATTERMOST_RECIPIENT`   | Channel or User to send Webhook notifications to. Send to multiple by seperating with comma. |         | x       |
-| `MATTERMOST_USERNAME`    | Username to send as eg `tiredofit`                                                           |         | x       |
+| `MATTERMOST_USERNAME`    | Username to send as eg `backup-bot`                                                           |         | x       |
 
 ##### Rocketchat Notifications
 | Parameter                | Description                                                                                  | Default | `_FILE` |
 | ------------------------ | -------------------------------------------------------------------------------------------- | ------- | ------- |
 | `ROCKETCHAT_WEBHOOK_URL` | Full URL to send webhook notifications to                                                    |         | x       |
 | `ROCKETCHAT_RECIPIENT`   | Channel or User to send Webhook notifications to. Send to multiple by seperating with comma. |         | x       |
-| `ROCKETCHAT_USERNAME`    | Username to send as eg `tiredofit`                                                           |         | x       |
+| `ROCKETCHAT_USERNAME`    | Username to send as eg `backup-bot`                                                           |         | x       |
 
 ## Maintenance
 
@@ -838,6 +844,42 @@ If you only enter some of the arguments you will be prompted to fill them in.
 
 
 
+## Security
+
+This image includes production-grade security hardening to protect database credentials and backup integrity:
+
+### Credential Protection
+
+- **MySQL/MariaDB**: Database credentials are stored in a secure `~/.my.cnf` file (mode 600) instead of being exposed via `MYSQL_PWD` environment variable or command-line arguments
+- **PostgreSQL**: Database credentials are stored in a secure `~/.pgpass` file (mode 600) instead of being exposed via `PGPASSWORD` environment variable
+- **MSSQL**: Database passwords are passed via `SQLCMDPASSWORD` environment variable and immediately cleared to prevent exposure
+- **Redis**: Database passwords are passed via `REDISCLI_AUTH` environment variable and immediately cleared to prevent exposure
+
+Passwords are never visible in:
+- Process listings (`ps aux`, `/proc/[pid]/cmdline`)
+- Environment variable dumps
+- Container inspection output
+
+### Package Integrity
+
+- All external downloads (PostgreSQL source, config files, MSSQL tools, InfluxDB, pbzip2) are verified using SHA256 checksums before extraction and installation
+- Removed insecure flags: eliminated `--allow-untrusted` apk installations and `--break-system-packages` pip installations
+- AWS CLI and blobxfer are installed in an isolated Python venv instead of directly into the system
+
+### Backup Log Protection
+
+- Backup logs are restricted to owner-only access (mode 700) instead of world-readable (mode 755)
+- Only the `dbbackup` user can read sensitive backup metadata and logs
+
+### Script Execution Safety
+
+- Pre-backup, post-backup, and notification scripts execute directly without using `eval()`, eliminating command injection vectors
+- All scripts retain permission checks and are executed with appropriate user context
+
+All credentials and sensitive data are handled securely throughout the backup and restore operations.
+
+
+
 ## Support
 
 These images were built to serve a specific need in a production environment and gradually have had more functionality added based on requests from the community.
@@ -845,7 +887,7 @@ These images were built to serve a specific need in a production environment and
 ### Usage
 
 - The [Discussions board](../../discussions) is a great place for working with the community on tips and tricks of using this image.
-- [Sponsor me](https://www.tiredofit.ca/sponsor) for personalized support
+- For personalized support, consider contributing to the project or opening detailed issues.
 
 ### Bugfixes
 
@@ -854,12 +896,12 @@ These images were built to serve a specific need in a production environment and
 ### Feature Requests
 
 - Feel free to submit a feature request, however there is no guarantee that it will be added, or at what timeline.
-- [Sponsor me](https://www.tiredofit.ca/sponsor) regarding development of features.
+- Consider contributing code changes or opening detailed issues for feature discussions.
 
 ### Updates
 
 - Best effort to track upstream changes, More priority if I am actively using the image in a production environment.
-- [Sponsor me](https://www.tiredofit.ca/sponsor) for up to date releases.
+- Community contributions are welcome for keeping the project up to date.
 
 ## License
 

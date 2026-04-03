@@ -1,3 +1,22 @@
+## 4.2.0 2026-04-03 <LunkSnee>
+
+   ### Security
+      - CRITICAL: Remove credential exposure in environment variables - MySQL, PostgreSQL, MSSQL, Redis now use secure credential files instead of command-line arguments or exported variables
+      - CRITICAL: Remove insecure package installation flags - Replace --allow-untrusted apk and --break-system-packages pip with verified downloads and Python venv isolation
+      - HIGH: Add SHA256 checksum verification for all external downloads - PostgreSQL, config files, MSSQL tools, InfluxDB, pbzip2
+      - HIGH: Restrict backup log permissions from world-readable (755) to owner-only (700)
+      - MEDIUM: Remove eval-based script execution - Replace unsafe eval() with direct script execution for pre/post backup and notification hooks
+      - Add version pinning for all external dependencies including blobxfer
+
+   ### Changed
+      - MySQL/MariaDB: Use ~/.my.cnf with restricted permissions instead of MYSQL_PWD environment variable
+      - PostgreSQL: Use ~/.pgpass file (PGPASSFILE) instead of PGPASSWORD environment variable
+      - MSSQL: Use SQLCMDPASSWORD environment variable instead of -P command-line argument (set once, then cleared)
+      - Redis: Use REDISCLI_AUTH environment variable instead of -a command-line argument
+      - Package management: Replace pip --break-system-packages with isolated Python venv at /opt/dbbackup/venv
+      - External downloads: All files verified via SHA256 checksums before extraction
+
+
 ## 4.1.100 2026-03-13 <dave at tiredofit dot ca>
 
    ### Changed
@@ -6,7 +25,7 @@
 
 ## 4.1.99 2026-03-12 <dave at tiredofit dot ca>
 
-This the final tiredofit/db-backup release - All development and releases will reside under the nfrastack/container-db-backup namespace going forward.
+Final release under tiredofit namespace - Development continues with enhanced security hardening.
 
    ### Added
       - Postgreaql 18 support
