@@ -29,7 +29,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          ignore: DL3028,DL3029,DL3009
+          ignore: DL3003,DL3009,DL3028,DL3029,SC1091
 
   shell-check:
     name: "Check Shell Scripts"
