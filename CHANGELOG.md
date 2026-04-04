@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.2.0] 2026-04-03 (LunkSnee)
+## 4.2.0 2026-04-03 (LunkSnee)
 
 ### Security
 
