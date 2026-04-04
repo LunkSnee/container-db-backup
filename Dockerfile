@@ -4,7 +4,9 @@ ARG DISTRO_VARIANT=3.21
 FROM docker.io/alpine:${DISTRO_VARIANT}
 LABEL maintainer="lunksnee (github.com/lunksnee)"
 
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+
+WORKDIR /
 
 ARG INFLUX1_CLIENT_VERSION=1.8.0 \
     INFLUX2_CLIENT_VERSION=2.7.5 \
@@ -126,7 +128,7 @@ RUN source /assets/functions/00-container && \
 			| grep -v -e perl -e python -e tcl \
             )"; \
 	package install .postgres-additional-deps \
-                    $runDeps \
+                    "$runDeps" \
 	               && \
 	\
     package remove \
