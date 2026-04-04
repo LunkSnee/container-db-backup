@@ -1,30 +1,29 @@
 ARG DISTRO=alpine
-ARG DISTRO_VARIANT=3.21
+ARG DISTRO_VARIANT=3.21-7.10.31
 
-FROM docker.io/alpine:${DISTRO_VARIANT}
+FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="lunksnee (github.com/lunksnee)"
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 WORKDIR /
 
-ARG INFLUX1_CLIENT_VERSION=1.8.0 \
+ARG POSTGRES_TAR_SHA256=6f14aa10bb67b8c2d7f280c63ddb3dbee9554a2a39d7d358f24431bac4798c75
+ARG CONFIG_GUESS_SHA256=3c1ff0db10ef9f4e8b6ed0125db308d614a209077487c03cd362d5b88b1d8e16
+ARG CONFIG_SUB_SHA256=ca694343d4058d58b016ad905f25d29d4c7ef8bdd9b3bf1d0c1df5c1e046a6bf
+ARG INFLUX2_CLIENT_SHA256=d8a48d4f94a8b1c2f0a846e0ae6b5f7d03d10e7f7ed004cf2810e38b2718e6f6
+ARG PBZIP2_SHA256=6f4c2fdcc3bf55c4d505ccf7f5dfd303e8f5d69a49e497f420ccc8664e761a12
+ARG MSODBCSQL18_SHA256=29c17885e2f8e5bcb0f4e9f5cd2a34b6d5d361bef4d9189e02c4c6ff7753beec
+ARG MSSQL_TOOLS18_SHA256=94acd01795511efd83f03f59e5fdcbe812eaeecd6335ba8e2f3770f4977ebf31
+
+ENV INFLUX1_CLIENT_VERSION=1.8.0 \
     INFLUX2_CLIENT_VERSION=2.7.5 \
     MSODBC_VERSION=18.6.1.1-1 \
     MSSQL_VERSION=18.6.1.1-1 \
-    MYSQL_VERSION=mysql-8.4.8 \
-    POSTGRES_TAR_SHA256=6f14aa10bb67b8c2d7f280c63ddb3dbee9554a2a39d7d358f24431bac4798c75 \
-    CONFIG_GUESS_SHA256=3c1ff0db10ef9f4e8b6ed0125db308d614a209077487c03cd362d5b88b1d8e16 \
-    CONFIG_SUB_SHA256=ca694343d4058d58b016ad905f25d29d4c7ef8bdd9b3bf1d0c1df5c1e046a6bf \
-    INFLUX2_CLIENT_SHA256=d8a48d4f94a8b1c2f0a846e0ae6b5f7d03d10e7f7ed004cf2810e38b2718e6f6 \
-    PBZIP2_SHA256=6f4c2fdcc3bf55c4d505ccf7f5dfd303e8f5d69a49e497f420ccc8664e761a12 \
-    MSODBCSQL18_SHA256=29c17885e2f8e5bcb0f4e9f5cd2a34b6d5d361bef4d9189e02c4c6ff7753beec \
-    MSSQL_TOOLS18_SHA256=94acd01795511efd83f03f59e5fdcbe812eaeecd6335ba8e2f3770f4977ebf31 \
     BLOBXFER_VERSION=1.17.4 \
-    MYSQL_REPO_URL=https://github.com/mysql/mysql-server \
     AWS_CLI_VERSION=1.44.56 \
-    POSTGRES_VERSION=18.3
-ENV CONTAINER_ENABLE_MESSAGING=TRUE \
+    POSTGRES_VERSION=18.3 \
+    CONTAINER_ENABLE_MESSAGING=TRUE \
     CONTAINER_ENABLE_MONITORING=TRUE \
     IMAGE_NAME="lunksnee/container-db-backup" \
     IMAGE_REPO_URL="https://github.com/lunksnee/container-db-backup/"
@@ -59,8 +58,6 @@ RUN source /assets/functions/00-container && \
                     openldap-dev \
                     openssl-dev \
                     perl-dev \
-                    perl-ipc-run \
-                    perl-utils \
                     python3-dev \
                     tcl-dev \
                     util-linux-dev \
@@ -101,7 +98,6 @@ RUN source /assets/functions/00-container && \
         --disable-rpath \
         --enable-integer-datetimes \
         --enable-thread-safety \
-        --enable-tap-tests \
         --with-gnu-ld \
         --with-icu \
         --with-ldap \
@@ -154,7 +150,6 @@ RUN source /assets/functions/00-container && \
                     build-base \
                     bzip2-dev \
                     cargo \
-                    cmake \
                     git \
                     go \
                     libarchive-dev \
@@ -228,17 +223,8 @@ RUN source /assets/functions/00-container && \
     fi ; \
     \
     clone_git_repo https://github.com/influxdata/influxdb "${INFLUX1_CLIENT_VERSION}" && \
-    go build -o /usr/sbin/influxd ./cmd/influxd && \
-    strip /usr/sbin/influxd && \
-    \
-    clone_git_repo "${MYSQL_REPO_URL}" "${MYSQL_VERSION}" && \
-    cmake \
-        -DCMAKE_BUILD_TYPE=MinSizeRel \
-        -DCMAKE_INSTALL_PREFIX=/opt/mysql \
-        -DFORCE_INSOURCE_BUILD=1 \
-        -DWITHOUT_SERVER:BOOL=ON \
-        && \
-    make -j$(nproc) install && \
+    go build -o /usr/sbin/influx1 ./cmd/influx && \
+    strip /usr/sbin/influx1 && \
     \
     python3 -m venv /opt/dbbackup/venv && \
     /opt/dbbackup/venv/bin/pip install --upgrade pip && \
