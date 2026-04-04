@@ -1,7 +1,7 @@
-ARG DISTRO=alpine
+ARG DISTRO=tiredofit/alpine
 ARG DISTRO_VARIANT=3.21-7.10.31
 
-FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
+FROM docker.io/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="lunksnee (github.com/lunksnee)"
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
