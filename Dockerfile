@@ -6,7 +6,7 @@ LABEL maintainer="lunksnee (github.com/lunksnee)"
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-ENV INFLUX1_CLIENT_VERSION=1.8.0 \
+ARG INFLUX1_CLIENT_VERSION=1.8.0 \
     INFLUX2_CLIENT_VERSION=2.7.5 \
     MSODBC_VERSION=18.6.1.1-1 \
     MSSQL_VERSION=18.6.1.1-1 \
@@ -21,8 +21,8 @@ ENV INFLUX1_CLIENT_VERSION=1.8.0 \
     BLOBXFER_VERSION=1.17.4 \
     MYSQL_REPO_URL=https://github.com/mysql/mysql-server \
     AWS_CLI_VERSION=1.44.56 \
-    POSTGRES_VERSION=18.3 \
-    CONTAINER_ENABLE_MESSAGING=TRUE \
+    POSTGRES_VERSION=18.3
+ENV CONTAINER_ENABLE_MESSAGING=TRUE \
     CONTAINER_ENABLE_MONITORING=TRUE \
     IMAGE_NAME="lunksnee/container-db-backup" \
     IMAGE_REPO_URL="https://github.com/lunksnee/container-db-backup/"
@@ -144,7 +144,7 @@ RUN source /assets/functions/00-container && \
     \
     set -ex && \
     addgroup -S -g 10000 dbbackup && \
-    adduser -S -D -H -u 10000 -G dbbackup -g "Tired of I.T! DB Backup" dbbackup && \
+    adduser -S -D -H -u 10000 -G dbbackup -g "DB Backup" dbbackup && \
     \
     package update && \
     package upgrade && \
@@ -198,11 +198,7 @@ RUN source /assets/functions/00-container && \
                     zstd \
                     && \
     \
-    echo ""
-    RUN set -ex && \
-    source /assets/functions/00-container && \
-    mkdir -p /opt/microsoft/msodbcsql18/ && \
-    touch /opt/microsoft/msodbcsql18/ACCEPT_EULA && \
+    set -ex && \
     case "$(uname -m)" in \
 	    "x86_64" ) mssql=true ; mssql_arch=amd64; influx2=true ; influx_arch=amd64; ;; \
         "arm64" | "aarch64" ) mssql=true ; mssql_arch=arm64; influx2=true ; influx_arch=arm64 ;; \
