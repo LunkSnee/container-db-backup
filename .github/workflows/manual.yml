@@ -38,6 +38,9 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@v4
 
+      - name: "Set lowercase image name"
+        run: echo "IMAGE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v3
 
@@ -83,8 +86,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}-${{ matrix.tag_suffix }}
-            ghcr.io/${{ github.repository }}:${{ steps.branch_tag.outputs.tag }}-${{ matrix.tag_suffix }}
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}-${{ matrix.tag_suffix }}
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.branch_tag.outputs.tag }}-${{ matrix.tag_suffix }}
           labels: |
             org.opencontainers.image.title=container-db-backup
             org.opencontainers.image.description=Production-grade database backup container with security hardening
@@ -104,6 +107,9 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
+
+      - name: "Set lowercase image name"
+        run: echo "IMAGE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: "Log in to GitHub Container Registry"
         uses: docker/login-action@v3
@@ -130,20 +136,20 @@ jobs:
           echo "📦 Creating multi-architecture manifests..."
           
           # Version manifest
-          docker manifest create ghcr.io/${{ github.repository }}:${{ steps.info.outputs.version }} \
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.version }}-amd64 \
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.version }}-arm64 \
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.version }}-armv7
-          docker manifest push ghcr.io/${{ github.repository }}:${{ steps.info.outputs.version }}
-          echo "✓ Pushed: ghcr.io/${{ github.repository }}:${{ steps.info.outputs.version }}"
+          docker manifest create ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.version }} \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.version }}-amd64 \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.version }}-arm64 \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.version }}-armv7
+          docker manifest push ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.version }}
+          echo "✓ Pushed: ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.version }}"
           
           # Branch/latest manifest
-          docker manifest create ghcr.io/${{ github.repository }}:${{ steps.info.outputs.tag }} \
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.tag }}-amd64 \
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.tag }}-arm64 \
-            ghcr.io/${{ github.repository }}:${{ steps.info.outputs.tag }}-armv7
-          docker manifest push ghcr.io/${{ github.repository }}:${{ steps.info.outputs.tag }}
-          echo "✓ Pushed: ghcr.io/${{ github.repository }}:${{ steps.info.outputs.tag }}"
+          docker manifest create ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.tag }} \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.tag }}-amd64 \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.tag }}-arm64 \
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.tag }}-armv7
+          docker manifest push ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.tag }}
+          echo "✓ Pushed: ghcr.io/${{ env.IMAGE_NAME }}:${{ steps.info.outputs.tag }}"
 
   notify:
     if: always()

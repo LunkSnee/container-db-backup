@@ -52,6 +52,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: "Set lowercase image name"
+        run: echo "IMAGE_NAME=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: "Set up QEMU"
         uses: docker/setup-qemu-action@v3
 
@@ -107,6 +110,9 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Set lowercase image name"
+        run: echo "IMAGE_NAME=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: "Extract version from CHANGELOG"
         id: version
