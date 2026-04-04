@@ -19,7 +19,7 @@
   hooks
 - Add version pinning for all external dependencies including blobxfer
 
-### Changed
+### Changes
 
 - MySQL/MariaDB: Use ~/.my.cnf with restricted permissions instead of
   MYSQL_PWD environment variable
@@ -36,7 +36,7 @@
 
 ## [4.1.100] 2026-03-13 (dave at tiredofit dot ca)
 
-### Changed
+### Changes
 
 - Repush of 4.1.99
 
@@ -45,9 +45,9 @@
 Final release under tiredofit namespace - Development continues with
 enhanced security hardening.
 
-### Added
+### Additions
 
-- Postgreaql 18 support
+- PostgreSQL 18 support
 - AWS CLI 1.44.56
 - MySQL 8.4.8
 - MSSQL 18.6.1-1
@@ -55,85 +55,102 @@ enhanced security hardening.
 
 ## [4.1.21] 2025-08-08 (dave at tiredofit dot ca)
 
-### Changed
+### Changes
 
 - Fix for 4.1.20 release inadvertently failing backups (credit tlex)
 
 ## [4.1.20] 2025-07-23 (dave at tiredofit dot ca)
 
-### Changed
+### Changes
 
 - Fix backup error checking routines #417 - credit alteriks
 
 ## [4.1.19] 2025-05-28 (dave at tiredofit dot ca)
 
-### Changed
+### Changes
 
 - Force overwrite manual scripts as opposed to append (#414)
 
 
-## 4.1.18 2025-05-12 <dave at tiredofit dot ca>
+## [4.1.18] 2025-05-12 (dave@tiredofit.ca)
 
-   ### Changed
-      - Fix MongoDB restore from not dropping DB each time before restore except explicitly told (credit logicoa@github)
+### Changes
 
-
-## 4.1.17 2025-04-17 <dave at tiredofit dot ca>
-
-   ### Changed
-      - Fix issue with Postgres database cleanup when ALL databases being backed up as one file (SPLIT_DB=FALSE)
+- Fix MongoDB restore from not dropping DB each time before restore
+  except explicitly told (credit logicoa@github)
 
 
-## 4.1.16 2025-02-21 <dave at tiredofit dot ca>
+## [4.1.17] 2025-04-17 (dave@tiredofit.ca)
 
-   ### Added
-      - Update to tiredofit/alpine:7.10.28
-      - Support TLS connectivity with restore script (credit fermion2020@github)
+### Changes
 
-
-## 4.1.15 2025-01-29 <dave at tiredofit dot ca>
-
-   ### Added
-      - Add support for username and password support when checking for connectivity to couchdb (credit: JvSomeren)
-
-   ### Changed
-      - Fix issue with couchdb compression routines
+- Fix issue with Postgres database cleanup when ALL databases being
+  backed up as one file (SPLIT_DB=FALSE)
 
 
-## 4.1.14 2025-01-21 <dave at tiredofit dot ca>
+## [4.1.16] 2025-02-21 (dave@tiredofit.ca)
 
-   ### Changed
-      - Downgrade AWS Client to 1.36.40 due to incompatibilities with providers with 1.37x. for time being
+### Additions
 
-
-## 4.1.13 2025-01-21 <dave at tiredofit dot ca>
-
-   ### Added
-      - Update MySQL client to 8.4.4
-      - Update AWS Client to 1.37.2
-
-   ### Changed
-      - Seperate MySQL and MariaDB TLS Configurationf for arguments that have deviated
+- Update to tiredofit/alpine:7.10.28
+- Support TLS connectivity with restore script (credit fermion2020@github)
 
 
-## 4.1.12 2024-12-13 <dave at tiredofit dot ca>
+## [4.1.15] 2025-01-29 (dave@tiredofit.ca)
 
-   ### Changed
-      - Fix for 4.1.11
+### Additions
+
+- Add support for username and password support when checking for
+  connectivity to couchdb (credit: JvSomeren)
+
+### Changes
+
+- Fix issue with couchdb compression routines
 
 
-## 4.1.11 2024-12-13 <dave at tiredofit dot ca>
+## [4.1.14] 2025-01-21 (dave@tiredofit.ca)
 
-   ### Changed
-      - Fix when backing up 'ALL' databases with MariaDB
+### Changes
+
+- Downgrade AWS Client to 1.36.40 due to incompatibilities with providers
+  with 1.37x. for time being
 
 
-## 4.1.10 2024-12-12 <dave at tiredofit dot ca>
+## [4.1.13] 2025-01-21 (dave@tiredofit.ca)
 
-   ### Added
-      - Use tiredofit/alpine:3.21-7.10.27 base
-      - Use the actual binary name when dumping mariadb and mysql databases
-      - Silence warnings that are appearing due to filenames, ssl warnings re MariaDB / MySQL
+### Additions
+
+- Update MySQL client to 8.4.4
+- Update AWS Client to 1.37.2
+
+### Changes
+
+- Separate MySQL and MariaDB TLS Configuration for arguments that have
+  deviated
+
+
+## [4.1.12] 2024-12-13 (dave@tiredofit.ca)
+
+### Changes
+
+- Fix for 4.1.11
+
+
+## [4.1.11] 2024-12-13 (dave@tiredofit.ca)
+
+### Changes
+
+- Fix when backing up 'ALL' databases with MariaDB
+
+
+## [4.1.10] 2024-12-12 (dave@tiredofit.ca)
+
+### Additions
+
+- Use tiredofit/alpine:3.21-7.10.27 base
+- Use the actual binary name when dumping mariadb and mysql databases
+- Silence warnings that are appearing due to filenames, ssl warnings re
+  MariaDB / MySQL
 
 
 ## 4.1.9 2024-11-07 <dave at tiredofit dot ca>

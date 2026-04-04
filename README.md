@@ -817,7 +817,14 @@ docker exec -it (whatever your container name is) bash
 
 Manual Backups can be performed by entering the container and typing `backup-now`. This will execute all the backup tasks that are scheduled by means of the `BACKUPXX_` variables. Alternatively if you wanted to execute a job on its own you could simply type `backup01-now` (or whatever your number would be). There is no concurrency, and jobs will be executed sequentially.
 
-- Recently there was a request to have the container work with Kubernetes cron scheduling. This can theoretically be accomplished by setting the container `MODE=MANUAL` and then setting `MANUAL_RUN_FOREVER=FALSE` - You would also want to disable a few features from the upstream base images specifically `CONTAINER_ENABLE_SCHEDULING` and `CONTAINER_ENABLE_MONITORING`. This should allow the container to start, execute a backup by executing and then exit cleanly. An alternative way to running the script is to execute `/etc/services.available/10-db-backup/run`.
+- Recently there was a request to have the container work with Kubernetes
+  cron scheduling. This can theoretically be accomplished by setting the
+  container `MODE=MANUAL` and then setting `MANUAL_RUN_FOREVER=FALSE` -
+  You would also want to disable a few features from the upstream base
+  images specifically `CONTAINER_ENABLE_SCHEDULING` and
+  `CONTAINER_ENABLE_MONITORING`. This should allow the container to start,
+  execute a backup by executing and then exit cleanly. An alternative way
+  to running the script is to execute `/etc/services.available/10-db-backup/run`.
 
 ### Restoring Databases
 
@@ -836,9 +843,11 @@ You will be presented with a series of menus allowing you to choose:
 The image will try to do auto detection based on the filename for the type, hostname, and database name.
 The image will also allow you to use environment variables or Docker secrets used to backup the images
 
-The script can also be executed skipping the interactive mode by using the following syntax/
+The script can also be executed skipping the interactive mode by using the following syntax:
 
-    `restore <filename> <db_type> <db_hostname> <db_name> <db_user> <db_pass> <db_port>`
+```
+restore <filename> <db_type> <db_hostname> <db_name> <db_user> <db_pass> <db_port>
+```
 
 If you only enter some of the arguments you will be prompted to fill them in.
 
@@ -850,33 +859,48 @@ This image includes production-grade security hardening to protect database cred
 
 ### Credential Protection
 
-- **MySQL/MariaDB**: Database credentials are stored in a secure `~/.my.cnf` file (mode 600) instead of being exposed via `MYSQL_PWD` environment variable or command-line arguments
-- **PostgreSQL**: Database credentials are stored in a secure `~/.pgpass` file (mode 600) instead of being exposed via `PGPASSWORD` environment variable
-- **MSSQL**: Database passwords are passed via `SQLCMDPASSWORD` environment variable and immediately cleared to prevent exposure
-- **Redis**: Database passwords are passed via `REDISCLI_AUTH` environment variable and immediately cleared to prevent exposure
+- **MySQL/MariaDB**: Database credentials are stored in a secure `~/.my.cnf`
+  file (mode 600) instead of being exposed via `MYSQL_PWD` environment
+  variable or command-line arguments
+- **PostgreSQL**: Database credentials are stored in a secure `~/.pgpass`
+  file (mode 600) instead of being exposed via `PGPASSWORD` environment
+  variable
+- **MSSQL**: Database passwords are passed via `SQLCMDPASSWORD` environment
+  variable and immediately cleared to prevent exposure
+- **Redis**: Database passwords are passed via `REDISCLI_AUTH` environment
+  variable and immediately cleared to prevent exposure
 
 Passwords are never visible in:
+
 - Process listings (`ps aux`, `/proc/[pid]/cmdline`)
 - Environment variable dumps
 - Container inspection output
 
 ### Package Integrity
 
-- All external downloads (PostgreSQL source, config files, MSSQL tools, InfluxDB, pbzip2) are verified using SHA256 checksums before extraction and installation
-- Removed insecure flags: eliminated `--allow-untrusted` apk installations and `--break-system-packages` pip installations
-- AWS CLI and blobxfer are installed in an isolated Python venv instead of directly into the system
+- All external downloads (PostgreSQL source, config files, MSSQL tools,
+  InfluxDB, pbzip2) are verified using SHA256 checksums before extraction
+  and installation
+- Removed insecure flags: eliminated `--allow-untrusted` apk
+  installations and `--break-system-packages` pip installations
+- AWS CLI and blobxfer are installed in an isolated Python venv instead
+  of directly into the system
 
 ### Backup Log Protection
 
-- Backup logs are restricted to owner-only access (mode 700) instead of world-readable (mode 755)
+- Backup logs are restricted to owner-only access (mode 700) instead of
+  world-readable (mode 755)
 - Only the `dbbackup` user can read sensitive backup metadata and logs
 
 ### Script Execution Safety
 
-- Pre-backup, post-backup, and notification scripts execute directly without using `eval()`, eliminating command injection vectors
-- All scripts retain permission checks and are executed with appropriate user context
+- Pre-backup, post-backup, and notification scripts execute directly
+  without using `eval()`, eliminating command injection vectors
+- All scripts retain permission checks and are executed with appropriate
+  user context
 
-All credentials and sensitive data are handled securely throughout the backup and restore operations.
+All credentials and sensitive data are handled securely throughout the
+backup and restore operations.
 
 
 
