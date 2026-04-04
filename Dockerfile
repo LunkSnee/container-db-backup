@@ -8,7 +8,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 WORKDIR /
 
-ARG POSTGRES_TAR_SHA256=6f14aa10bb67b8c2d7f280c63ddb3dbee9554a2a39d7d358f24431bac4798c75
+ARG POSTGRES_TAR_SHA256=d95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f
 ARG CONFIG_GUESS_SHA256=3c1ff0db10ef9f4e8b6ed0125db308d614a209077487c03cd362d5b88b1d8e16
 ARG CONFIG_SUB_SHA256=ca694343d4058d58b016ad905f25d29d4c7ef8bdd9b3bf1d0c1df5c1e046a6bf
 ARG INFLUX2_CLIENT_SHA256=d8a48d4f94a8b1c2f0a846e0ae6b5f7d03d10e7f7ed004cf2810e38b2718e6f6
@@ -97,7 +97,6 @@ RUN source /assets/functions/00-container && \
         --with-pgport=5432 \
         --disable-rpath \
         --enable-integer-datetimes \
-        --enable-thread-safety \
         --with-gnu-ld \
         --with-icu \
         --with-ldap \
