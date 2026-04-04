@@ -201,7 +201,7 @@ RUN source /assets/functions/00-container && \
         *) sleep 0.1 ;; \
     esac; \
     \
-    if [ "${mssql,,}" = "true" ] ; then \
+    if [ "$mssql" = "true" ] ; then \
         curl -sSL --progress-bar "https://download.microsoft.com/download/9dcab408-e0d4-4571-a81a-5a0951e3445f/msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk" -O ; \
         echo "${MSODBCSQL18_SHA256}  msodbcsql18_${MSODBC_VERSION}_${mssql_arch}.apk" | sha256sum -c - ; \
         curl -sSL --progress-bar "https://download.microsoft.com/download/b60bb8b6-d398-4819-9950-2e30cf725fb0/mssql-tools18_${MSSQL_VERSION}_${mssql_arch}.apk" -O ; \
@@ -211,7 +211,7 @@ RUN source /assets/functions/00-container && \
         echo >&2 "Detected non x86_64 or ARM64 build variant, skipping MSSQL installation" ; \
     fi; \
     \
-    if [ "${influx2,,}" = "true" ] ; then \
+    if [ "$influx2" = "true" ] ; then \
         curl -sSL --progress-bar "https://dl.influxdata.com/influxdb/releases/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" -o "/tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" && \
         echo "$INFLUX2_CLIENT_SHA256  /tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" | sha256sum -c - && \
         tar xvfz "/tmp/influxdb2-client-${INFLUX2_CLIENT_VERSION}-linux-${influx_arch}.tar.gz" --strip=1 -C /usr/src/ ; \

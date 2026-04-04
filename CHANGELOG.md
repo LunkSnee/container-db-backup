@@ -52,7 +52,6 @@ enhanced security hardening.
 - MySQL 8.4.8
 - MSSQL 18.6.1-1
 
-
 ## [4.1.21] 2025-08-08 (dave at tiredofit dot ca)
 
 ### Changes
@@ -70,32 +69,24 @@ enhanced security hardening.
 ### Changes
 
 - Force overwrite manual scripts as opposed to append (#414)
-
-
 ## [4.1.18] 2025-05-12 (dave@tiredofit.ca)
 
 ### Changes
 
 - Fix MongoDB restore from not dropping DB each time before restore
   except explicitly told (credit logicoa@github)
-
-
 ## [4.1.17] 2025-04-17 (dave@tiredofit.ca)
 
 ### Changes
 
 - Fix issue with Postgres database cleanup when ALL databases being
   backed up as one file (SPLIT_DB=FALSE)
-
-
 ## [4.1.16] 2025-02-21 (dave@tiredofit.ca)
 
 ### Additions
 
 - Update to tiredofit/alpine:7.10.28
 - Support TLS connectivity with restore script (credit fermion2020@github)
-
-
 ## [4.1.15] 2025-01-29 (dave@tiredofit.ca)
 
 ### Additions
@@ -106,16 +97,12 @@ enhanced security hardening.
 ### Changes
 
 - Fix issue with couchdb compression routines
-
-
 ## [4.1.14] 2025-01-21 (dave@tiredofit.ca)
 
 ### Changes
 
 - Downgrade AWS Client to 1.36.40 due to incompatibilities with providers
   with 1.37x. for time being
-
-
 ## [4.1.13] 2025-01-21 (dave@tiredofit.ca)
 
 ### Additions
@@ -127,22 +114,16 @@ enhanced security hardening.
 
 - Separate MySQL and MariaDB TLS Configuration for arguments that have
   deviated
-
-
 ## [4.1.12] 2024-12-13 (dave@tiredofit.ca)
 
 ### Changes
 
 - Fix for 4.1.11
-
-
 ## [4.1.11] 2024-12-13 (dave@tiredofit.ca)
 
 ### Changes
 
 - Fix when backing up 'ALL' databases with MariaDB
-
-
 ## [4.1.10] 2024-12-12 (dave@tiredofit.ca)
 
 ### Additions
@@ -151,8 +132,6 @@ enhanced security hardening.
 - Use the actual binary name when dumping mariadb and mysql databases
 - Silence warnings that are appearing due to filenames, ssl warnings re
   MariaDB / MySQL
-
-
 ## 4.1.9 2024-11-07 <dave at tiredofit dot ca>
 
    ### Added
@@ -163,15 +142,11 @@ enhanced security hardening.
       - Influx2 Client 2.7.5
       - AWS Client 1.35.13
       - Postgresql 17.x Support
-
-
 ## 4.1.8 2024-10-29 <dave at tiredofit dot ca>
 
 Rebuild using 4.1.4 sources - ignore any versions of 4.1.5-4.1.7
 
    ### Added
-
-
 ## 4.1.4 2024-08-13 <dave at tiredofit dot ca>
 
 Please note that if using encryption using a passphrase, you may be encountering issues with manual decryption. This release fixes that.
@@ -179,14 +154,10 @@ If you try to manually decrypt and your passphrase fails. Try wrapping it in sin
 
    ### Changed
       - Fix for stray quotes appearing inside of ENCRYPT_PASSPHRASE variables
-
-
 ## 4.1.3 2024-07-05 <dave at tiredofit dot ca>
 
    ### Changed
       - Rebuild to support tiredofit/alpine:7.10.0
-
-
 ## 4.1.2 2024-07-02 <effectivelywild@github>
 
    ### Added
@@ -194,14 +165,10 @@ If you try to manually decrypt and your passphrase fails. Try wrapping it in sin
       - Fix timestamps when comparing previous backups
       - Resolve unnecessary read operations in Azure
       - Resolve issues with backup cleanup operations in Azure
-
-
 ## 4.1.1 2024-06-19 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix issue where postgresql globals when backing up ALL not being deleted (#352)
-
-
 ## 4.1.0 2024-05-25 <dave at tiredofit dot ca>
 
     Note that arm/v7 builds have been removed from this release going forward
@@ -212,182 +179,124 @@ If you try to manually decrypt and your passphrase fails. Try wrapping it in sin
       - MariaDB 10.11.8 Client
       - AWS Client 1.32.113
       - MySQL Client 8.4.0
-
-
 ## 4.0.35 2024-01-14 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix issue with emaail notifications and not being able to add from statement
-
-
 ## 4.0.34 2024-01-02 <dave at tiredofit dot ca>
 
    ### Changed
       - Change the way architectures are detected to re-enable backups with MSSQL and Influx2
-
-
 ## 4.0.33 2023-12-18 <dave at tiredofit dot ca>
 
    ### Changed
       - Allow _OPTS variabls to contain spaces
       - Switch references of _DUMP_OPTS to _BACKUP_OPTS
-
-
 ## 4.0.32 2023-12-15 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix issue with directories not properly being backed up (InfluxDB)
-
-
 ## 4.0.31 2023-12-12 <dave at tiredofit dot ca>
 
    ### Changed
       - Support backing up databases with spaces in them
-
-
 ## 4.0.30 2023-12-11 <dave at tiredofit dot ca>
 
    ### Added
       - Seperate each job with its own temporary folder for isolation and to better cleanup jobs that backup as a directory instead of a flat file
-
-
 ## 4.0.29 2023-12-04 <dave at tiredofit dot ca>
 
    ### Changed
       - Skip blobxfer if either account or key is not present
-
-
 ## 4.0.28 2023-12-04 <dave at tiredofit dot ca>
 
    ### Changed
       - AWS Cli 1.31.5
       - Switch to using PIP for installing AWS-Cli to remove deprecation warnings
-
-
 ## 4.0.27 2023-12-04 <dave at tiredofit dot ca>
 
    ### Changed
       - Switch to using actual crontab for cron expressions
-
-
 ## 4.0.26 2023-11-30 <dave at tiredofit dot ca>
 
    ### Added
       - AWS CLI 1.31.4
-
-
 ## 4.0.25 2023-11-29 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix #297 - Add parameters to blobxfer to restore functionality
-
-
 ## 4.0.24 2023-11-28 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix issue with cron parsing and 0 being a value getting clobbered by sort command
-
-
 ## 4.0.23 2023-11-28 <dave at tiredofit dot ca>
 
    ### Changed
       - Resolve issue with custom notification scripts not executing
-
-
 ## 4.0.22 2023-11-25 <dave at tiredofit dot ca>
 
    ### Changed
       - Move cleanup_old_data routines to happen within backup_ function to properly accomodate for globals, and ALL DB_NAME use cases
-
-
 ## 4.0.21 2023-11-22 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix for SQLite backups not being cleaned up properly due to a malformed base
-
-
 ## 4.0.20 2023-11-21 <dave at tiredofit dot ca>
 
    ### Changed
       - Update base image to support S6 Overlay 3.1.6.2 to solve shutdown issues specifically with MODE=MANUAL and MANUAL_RUN_FOREVER=TRUE
       - Add some safety nets for Manual scheduling
-
-
 ## 4.0.19 2023-11-20 <dave at tiredofit dot ca>
 
    ### Changed
       - Make adjustments to cron scheduling feature to be able to handle whitespace properly"
-
-
 ## 4.0.18 2023-11-18 <joergmschulz@github>
 
    ### Changed
       - Fix loading msmtp configuration
-
-
 ## 4.0.17 2023-11-17 <dave at tiredofit dot ca>
 
    ### Changed
       - Provide more details when notifying via instant messages
-
-
 ## 4.0.16 2023-11-17 <dave at tiredofit dot ca>
 
    ### Changed
       - Switch to using msmtp instead of s-mail for notify()
-
-
 ## 4.0.15 2023-11-16 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix cleanup of old backups
-
-
 ## 4.0.14 2023-11-13 <dave at tiredofit dot ca>
 
    ### Changed
       - Bugfix when PRE/POST scripts found not giving legacy warning
       - Run pre / post scripts as root
-
-
 ## 4.0.13 2023-11-12 <dave at tiredofit dot ca>
 
    ### Changed
       - Check for any quotes if using MONGO_CUSTOM_URI and remove
-
-
 ## 4.0.12 2023-11-12 <dave at tiredofit dot ca>
 
    ### Changed
       - Allow creating schedulers if _MONGO_CUSTOM_URI is set and _DB_HOST blank
-
-
 ## 4.0.11 2023-11-11 <dave at tiredofit dot ca>
 
    ### Changed
       - Resolve issue with backing up ALL databases with PGSQL and MySQL
-
-
 ## 4.0.10 2023-11-11 <dave at tiredofit dot ca>
 
    ### Changed
       - Change environment variable parsing routines to properly accomodate for Passwords containing '=='
-
-
 ## 4.0.9 2023-11-11 <dave at tiredofit dot ca>
 
    ### Changed
       - Fix issue with quotes being wrapped around _PASS variables
-
-
 ## 4.0.8 2023-11-11 <dave at tiredofit dot ca>
 
    ### Changed
       - Tidy up file_encryption() routines
       - Change environment variable _ENCRYPT_PUBKEY to _ENCRYPT_PUBLIC_KEY
       - Add new environment variable _ENCRYPT_PRIVATE_KEY
-
-
 ## 4.0.7 2023-11-11 <dave at tiredofit dot ca>
 
    ### Added
@@ -398,8 +307,6 @@ If you try to manually decrypt and your passphrase fails. Try wrapping it in sin
       - SQLite3 now backs up without running into file permission/access problems
       - Cleanup old sqlite backups from temp directory
       - Handle multiple SQLite3 backups concurrently
-
-
 ## 4.0.6 2023-11-10 <dave at tiredofit dot ca>
 
    ### Added
@@ -407,8 +314,6 @@ If you try to manually decrypt and your passphrase fails. Try wrapping it in sin
 
    ### Changed
       - Fix issue with Influx DB not properly detecting the correct version
-
-
 ## 4.0.5 2023-11-10 <dave at tiredofit dot ca>
 
    ### Added
@@ -417,32 +322,22 @@ If you try to manually decrypt and your passphrase fails. Try wrapping it in sin
 
    ### Changed
       - Change _FILESYSTEM_PERMISSION to 600 from 700
-
-
 ## 4.0.4 2023-11-09 <dave at tiredofit dot ca>
 
    ### Added
       - Add support for restoring from different DB_ variables in restore script
-
-
 ## 4.0.3 2023-11-09 <dave at tiredofit dot ca>
 
    ### Changed
       - Resolve issue with _MYSQL_TLS_CERT_FILE not being read
-
-
 ## 4.0.2 2023-11-09 <dave at tiredofit dot ca>
 
    ### Changed
       - Properly use custom _S3_HOST variables
-
-
 ## 4.0.1 2023-11-09 <dave at tiredofit dot ca>
 
    ### Changed
       - Restore - Stop using DB_DUMP_TARGET and instead browse using DEFAULT_BACKUP_PATH
-
-
 ## 4.0.0 2023-11-08 <dave at tiredofit dot ca>
 
 This is the fourth major release to the DB Backup image which started as a basic MySQL backup service in early 2017. With each major release brings enhancements, bugfixes, removals along with breaking changes and this one is no different.
@@ -501,20 +396,14 @@ A significant amount of development hours were put in to accomodate for feature 
 
    ### Removed
       - `ENABLE_CHECKSUM` - has been wrapped into `_CHECKSUM=none`
-
-
 ## 3.12.0 2023-10-29 <alwynpan@github>
 
    ### Added
       - Add DB_AUTH functionalith for Postgresql databases
-
-
 ## 3.12.0 2023-10-29 <alwynpan>
 
    ### Added
       - Add DB_AUTH environment for PGSQL
-
-
 ## 3.11.1 2023-10-23 <dave at tiredofit dot ca>
 
 ### Added
